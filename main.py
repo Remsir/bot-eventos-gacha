@@ -2,7 +2,7 @@ from web import iniciar_web
 import discord
 from discord.ext import commands, tasks
 import json
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 
 import pytz
 import asyncio
