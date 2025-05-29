@@ -289,35 +289,42 @@ async def on_ready():
     print(f"Bot iniciado como {bot.user}")
 
     if canal_id and fijado_id:
-        canal = bot.get_channel(canal_id)
-        if canal:
-            try:
-                mensaje = await canal.fetch_message(fijado_id)
-                eventos_actualizados = cargar_eventos()
+        try:
+            # Intentar obtener el canal, con fallback a fetch
+            canal = bot.get_channel(canal_id)
+            if canal is None:
+                print("ℹ️ Canal no en caché, intentando fetch_channel...")
+                canal = await bot.fetch_channel(canal_id)
 
-                # Eliminar eventos vencidos
-                for juego in list(eventos_actualizados.keys()):
-                    eventos_actualizados[juego] = [
-                        e for e in eventos_actualizados[juego]
-                        if formatear_tiempo_restante(e["fecha"])
-                    ]
-                    if not eventos_actualizados[juego]:
-                        del eventos_actualizados[juego]
-                guardar_eventos(eventos_actualizados)
+            # Intentar obtener el mensaje fijado
+            mensaje = await canal.fetch_message(fijado_id)
 
-                nuevo_texto = construir_mensaje(eventos_actualizados)
-                await mensaje.edit(content=nuevo_texto)
-                print("✅ Mensaje fijado actualizado automáticamente al iniciar.")
-                await esperar_hora_exacta()
-                actualizar_eventos.start()
+            eventos_actualizados = cargar_eventos()
 
-            except discord.NotFound:
-                print("⚠️ El mensaje fijado guardado ya no existe.")
-            except Exception as e:
-                print(f"❌ Error al actualizar mensaje al iniciar: {e}")
+            # Eliminar eventos vencidos
+            for juego in list(eventos_actualizados.keys()):
+                eventos_actualizados[juego] = [
+                    e for e in eventos_actualizados[juego]
+                    if formatear_tiempo_restante(e["fecha"])
+                ]
+                if not eventos_actualizados[juego]:
+                    del eventos_actualizados[juego]
 
-        else:
-            print("⚠️ Canal no encontrado.")
+            guardar_eventos(eventos_actualizados)
+
+            nuevo_texto = construir_mensaje(eventos_actualizados)
+            await mensaje.edit(content=nuevo_texto)
+            print("✅ Mensaje fijado actualizado automáticamente al iniciar.")
+
+            await esperar_hora_exacta()
+            actualizar_eventos_loop.start()
+
+        except discord.NotFound:
+            print("⚠️ El mensaje fijado guardado ya no existe.")
+        except discord.Forbidden:
+            print("❌ Permisos insuficientes para acceder al canal o mensaje.")
+        except Exception as e:
+            print(f"❌ Error inesperado al actualizar mensaje al iniciar: {e}")
     else:
         print("ℹ️ No hay mensaje fijado previo guardado.")
 
