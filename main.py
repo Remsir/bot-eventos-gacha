@@ -260,10 +260,6 @@ async def esperar_hora_exacta():
     await asyncio.sleep(espera)
     actualizar_eventos.start()
 
-@tasks.loop(hours=1)
-async def actualizar_eventos_loop():
-    await actualizar_mensaje_eventos()
-
 @bot.event
 async def on_ready():
     print(f"Bot iniciado como {bot.user}")
@@ -289,7 +285,8 @@ async def on_ready():
                 await mensaje.edit(content=nuevo_texto)
                 print("✅ Mensaje fijado actualizado automáticamente al iniciar.")
                 await esperar_hora_exacta()
-                actualizar_eventos_loop.start()
+                actualizar_eventos.start()
+
             except discord.NotFound:
                 print("⚠️ El mensaje fijado guardado ya no existe.")
             except Exception as e:
