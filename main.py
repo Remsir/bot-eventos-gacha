@@ -318,12 +318,11 @@ async def on_command_error(ctx, error):
         await ctx.send("❌ Error desconocido. Revisa la sintaxis.")
         print(f"Error desconocido: {error}")
 
-
-async def apagar_si_fuera_de_horario():
-    tz = pytz.timezone("America/Santiago")  # UTC-4
-    ahora = datetime.datetime.now(tz)
+sync def apagar_si_fuera_de_horario():
+    tz = pytz.timezone("America/Santiago")
+    ahora = datetime.now(tz)  # ✅ Correcto  # UTC-4
     hora_actual = ahora.time()
-
+    
     inicio = datetime.time(hour=14, minute=00)  # 05:30
     fin = datetime.time(hour=6, minute=30)     # 02:00
 
