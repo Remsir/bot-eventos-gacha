@@ -1,0 +1,62 @@
+{
+    "StarRail": [
+        {
+            "nombre": "Leyenda_del_Bate",
+            "fecha": "2025-06-30T05:00:00"
+        }
+    ],
+    "Zenless": [
+        {
+            "nombre": "Historia_Espejo",
+            "fecha": "2025-06-05T05:00:00"
+        },
+        {
+            "nombre": "Fotos",
+            "fecha": "2025-06-05T05:00:00"
+        },
+        {
+            "nombre": "Incursion",
+            "fecha": "2025-05-30T05:00:00"
+        },
+        {
+            "nombre": "Defensa",
+            "fecha": "2025-06-06T05:00:00"
+        }
+    ],
+    "Genshin": [
+        {
+            "nombre": "Teatro",
+            "fecha": "2025-06-01T05:00:00"
+        },
+        {
+            "nombre": "Abismo",
+            "fecha": "2025-06-16T05:00:00"
+        },
+        {
+            "nombre": "Simulacro_lluvia",
+            "fecha": "2025-06-03T05:00:00"
+        },
+        {
+            "nombre": "Cambios_Estrategicos",
+            "fecha": "2025-06-09T05:00:00"
+        },
+        {
+            "nombre": "Parche",
+            "fecha": "2025-06-17T19:00:00"
+        }
+    ],
+    "WuWa": [
+        {
+            "nombre": "Dango1",
+            "fecha": "2025-06-11T05:00:00"
+        },
+        {
+            "nombre": "Mercado_negro",
+            "fecha": "2025-06-23T05:00:00"
+        },
+        {
+            "nombre": "Dango2",
+            "fecha": "2025-06-11T05:00:00"
+        }
+    ]
+}
