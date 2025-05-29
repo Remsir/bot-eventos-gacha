@@ -2,11 +2,10 @@ from web import iniciar_web
 import discord
 from discord.ext import commands, tasks
 import json
-from datetime import datetime, time, timedelta
-
+from datetime import datetime, timedelta
 import pytz
 import asyncio
-import os
+from config import TOKEN
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -14,10 +13,6 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 EVENTS_FILE = "eventos.json"
 UPDATE_INTERVAL_MINUTES = 60
-TOKEN = os.getenv('TOKEN')
-if TOKEN is None:
-    raise ValueError("El token no está definido. Asegúrate de configurar la variable de entorno 'TOKEN'.")
-
 
 # ---------------- UTILIDADES ---------------- #
 
@@ -108,7 +103,7 @@ async def crear(ctx, juego: str, nombre: str, fecha: str, hora: str):
     except ValueError:
         await ctx.send("❌ Formato incorrecto. Usa: !crear Genshin Evento1 2025-06-01 18:00")
 
-
+    
 
 
 @bot.command()
@@ -197,7 +192,7 @@ async def editar(ctx, juego: str, nombre_viejo: str, nombre_nuevo: str, fecha: s
         await ctx.send("❌ Formato incorrecto. Usa: !editar Genshin Viejo Nuevo 2025-06-01 18:00")
 
 
-
+    
 
 # ---------------- ACTUALIZACIÓN AUTOMÁTICA ---------------- #
 
@@ -227,7 +222,7 @@ async def actualizar_mensaje():
         print("Error actualizando mensaje:", e)
 
 
-
+    
 async def actualizar_mensaje_eventos():
     global canal_id, fijado_id
     if canal_id and fijado_id:
@@ -319,29 +314,7 @@ async def on_command_error(ctx, error):
         await ctx.send("❌ Error desconocido. Revisa la sintaxis.")
         print(f"Error desconocido: {error}")
 
-async def apagar_si_fuera_de_horario():
-    tz = pytz.timezone("America/Santiago")
-    ahora = datetime.now(tz)
-    hora_actual = ahora.replace(second=0, microsecond=0).time()  # redondea a minutos
 
-    # Rango de prueba: de 02:06 a 02:10
-    inicio_apagado = time(hour=2, minute=14)
-    fin_apagado = time(hour=2, minute=16)
-
-    print(f"🕒 Hora actual: {hora_actual} | Verificando entre {inicio_apagado} y {fin_apagado}")
-
-    if inicio_apagado <= hora_actual < fin_apagado:
-        print("🛑 Bot fuera del horario permitido. Cerrando...")
-        await asyncio.sleep(2)
-        os._exit(0)
-    else:
-        print("✅ Dentro del horario permitido.")
-
-def iniciar_bot():
-    bot.run(TOKEN)
 
 if __name__ == "__main__":
-    iniciar_web()
-    asyncio.run(apagar_si_fuera_de_horario())
-    iniciar_bot()
-    asyncio.run(main())
+    bot.run(TOKEN)
