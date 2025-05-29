@@ -13,6 +13,10 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 EVENTS_FILE = "eventos.json"
 UPDATE_INTERVAL_MINUTES = 60
+TOKEN = os.getenv('TOKEN')
+if TOKEN is None:
+    raise ValueError("El token no está definido. Asegúrate de configurar la variable de entorno 'TOKEN'.")
+
 
 # ---------------- UTILIDADES ---------------- #
 
