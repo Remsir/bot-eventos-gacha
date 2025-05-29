@@ -325,7 +325,7 @@ async def apagar_si_fuera_de_horario():
     hora_actual = ahora.time()
 
     # Rango de prueba: de 02:06 a 02:10
-    inicio_apagado = time(hour=2, minute=6)
+    inicio_apagado = time(hour=2, minute=8)
     fin_apagado = time(hour=2, minute=10)
 
     if inicio_apagado <= hora_actual < fin_apagado:
