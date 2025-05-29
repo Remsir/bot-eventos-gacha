@@ -324,8 +324,8 @@ async def apagar_si_fuera_de_horario():
     ahora = datetime.now(tz)  # ✅ Correcto  # UTC-4
     hora_actual = ahora.time()
     
-    inicio = datetime.time(hour=14, minute=00)  # 05:30
-    fin = datetime.time(hour=2, minute=00)     # 02:00
+    inicio = time(hour=14, minute=00)  # 05:30
+    fin = time(hour=2, minute=00)     # 02:00
 
     if inicio <= hora_actual or hora_actual < fin:
         print("🛑 Bot fuera del horario permitido. Cerrando...")
