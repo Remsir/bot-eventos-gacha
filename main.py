@@ -315,6 +315,7 @@ async def on_command_error(ctx, error):
         print(f"Error desconocido: {error}")
 
 
-iniciar_web()
-TOKEN = os.getenv("TOKEN")
+if __name__ == "__main__":
+    iniciar_web()
+    bot.run(TOKEN)
 
