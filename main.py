@@ -5,6 +5,7 @@ import json
 from datetime import datetime, timedelta
 import pytz
 import asyncio
+import os
 
 intents = discord.Intents.default()
 intents.message_content = True
