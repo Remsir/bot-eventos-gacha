@@ -5,7 +5,6 @@ import json
 from datetime import datetime, timedelta
 import pytz
 import asyncio
-from config import TOKEN
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -13,6 +12,8 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 EVENTS_FILE = "eventos.json"
 UPDATE_INTERVAL_MINUTES = 60
+TOKEN = os.getenv("TOKEN")
+
 
 # ---------------- UTILIDADES ---------------- #
 
