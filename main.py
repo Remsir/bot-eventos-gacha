@@ -321,21 +321,23 @@ async def on_command_error(ctx, error):
 
 async def apagar_si_fuera_de_horario():
     tz = pytz.timezone("America/Santiago")
-    ahora = datetime.now(tz)  # ✅ Correcto  # UTC-4
+    ahora = datetime.now(tz)
     hora_actual = ahora.time()
     
-    inicio = time(hour=14, minute=00)  # 05:30
-    fin = time(hour=2, minute=00)     # 02:00
+    # Horario en que debe estar apagado: 05:30 a 14:00
+    inicio = time(hour=5, minute=30)
+    fin = time(hour=2, minute=1)
 
-    if inicio <= hora_actual or hora_actual < fin:
+    if inicio <= hora_actual < fin:
         print("🛑 Bot fuera del horario permitido. Cerrando...")
         await asyncio.sleep(2)
         os._exit(0)
 
-async def main():
-    iniciar_web()
-    await apagar_si_fuera_de_horario()
+def iniciar_bot():
     bot.run(TOKEN)
 
 if __name__ == "__main__":
+    iniciar_web()
+    asyncio.run(apagar_si_fuera_de_horario())
+    iniciar_bot()
     asyncio.run(main())
