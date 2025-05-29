@@ -197,6 +197,51 @@ async def editar(ctx, juego: str, nombre_viejo: str, nombre_nuevo: str, fecha: s
     
 
 # ---------------- ACTUALIZACIÓN AUTOMÁTICA ---------------- #
+async def actualizar_mensaje_eventos():
+    global canal_id, fijado_id
+    if canal_id and fijado_id:
+        eventos = cargar_eventos()
+        canal = bot.get_channel(canal_id)
+
+        cambios = False  # Para guardar si se actualizó algo
+        ahora = datetime.now() - timedelta(hours=4)
+
+        for juego in list(eventos.keys()):
+            nuevos_eventos = []
+            for evento in eventos[juego]:
+                # Verifica si sigue activo
+                if formatear_tiempo_restante(evento["fecha"]):
+                    fecha_evento = datetime.fromisoformat(evento["fecha"])
+                    horas_restantes = (fecha_evento - ahora).total_seconds() / 3600
+
+                    # Si está a 3 días (±30 minutos), y no fue notificado aún
+                    if 71.5 <= horas_restantes <= 72.5 and not evento.get("notificado_3dias"):
+                        if canal:
+                            try:
+                                await canal.send(
+                                    f"📣 @everyone El evento **{evento['nombre']}** de **{juego}** comienza en 3 días."
+                                )
+                                evento["notificado_3dias"] = True
+                                cambios = True
+                            except Exception as e:
+                                print(f"❌ Error al notificar evento de 3 días: {e}")
+                    nuevos_eventos.append(evento)
+            if nuevos_eventos:
+                eventos[juego] = nuevos_eventos
+            else:
+                del eventos[juego]
+                cambios = True
+
+        if cambios:
+            guardar_eventos(eventos)
+
+        # Actualizar mensaje fijado
+        if canal:
+            try:
+                mensaje = await canal.fetch_message(fijado_id)
+                await mensaje.edit(content=construir_mensaje(eventos))
+            except discord.NotFound:
+                print("Mensaje fijado no encontrado.")
 
 @tasks.loop(minutes=UPDATE_INTERVAL_MINUTES)
 async def actualizar_mensaje():
@@ -222,27 +267,6 @@ async def actualizar_mensaje():
         await mensaje.edit(content=nuevo_contenido)
     except Exception as e:
         print("Error actualizando mensaje:", e)
-
-
-    
-async def actualizar_mensaje_eventos():
-    global canal_id, fijado_id
-    if canal_id and fijado_id:
-        eventos = cargar_eventos()
-        # Eliminar eventos vencidos
-        for juego in list(eventos.keys()):
-            eventos[juego] = [e for e in eventos[juego] if formatear_tiempo_restante(e["fecha"])]
-            if not eventos[juego]:
-                del eventos[juego]
-        guardar_eventos(eventos)
-
-        canal = bot.get_channel(canal_id)
-        if canal:
-            try:
-                mensaje = await canal.fetch_message(fijado_id)
-                await mensaje.edit(content=construir_mensaje(eventos))
-            except discord.NotFound:
-                print("Mensaje fijado no encontrado.")
 
 
 @tasks.loop(minutes=60)
