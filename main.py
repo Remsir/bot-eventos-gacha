@@ -298,33 +298,17 @@ async def esperar_hora_exacta():
     await asyncio.sleep(espera)
     actualizar_eventos.start()
 
-async def esperar_minuto_10():
-    tz = pytz.timezone("Etc/GMT+4")
-    ahora = datetime.now(tz)
-    siguiente = (ahora + timedelta(hours=0)).replace(minute=33, second=0, microsecond=0)
-    espera = (siguiente - ahora).total_seconds()
-    print(f"⏳ Esperando {int(espera)} segundos hasta el minuto 10 de la siguiente hora (UTC-4)...")
-    await asyncio.sleep(espera)
 
-    if not actualizar_eventos.is_running():
-        actualizar_eventos.start()
-        print("🔁 Loop de actualización iniciado.")
-    else:
-        print("⚠️ El loop de actualización ya estaba corriendo.")
-@bot.event
 async def on_ready():
     print(f"Bot iniciado como {bot.user}")
-    actualizar_eventos.start()
-    #await esperar_minuto_10()
+
     if canal_id and fijado_id:
         try:
-            # Intentar obtener el canal, con fallback a fetch
             canal = bot.get_channel(canal_id)
             if canal is None:
                 print("ℹ️ Canal no en caché, intentando fetch_channel...")
                 canal = await bot.fetch_channel(canal_id)
 
-            # Intentar obtener el mensaje fijado
             mensaje = await canal.fetch_message(fijado_id)
 
             eventos_actualizados = cargar_eventos()
@@ -344,10 +328,6 @@ async def on_ready():
             await mensaje.edit(content=nuevo_texto)
             print("✅ Mensaje fijado actualizado automáticamente al iniciar.")
 
-            await esperar_hora_exacta()
-            actualizar_eventos.start()  # No usar el nombre incorrecto
-
-
         except discord.NotFound:
             print("⚠️ El mensaje fijado guardado ya no existe.")
         except discord.Forbidden:
@@ -356,6 +336,9 @@ async def on_ready():
             print(f"❌ Error inesperado al actualizar mensaje al iniciar: {e}")
     else:
         print("ℹ️ No hay mensaje fijado previo guardado.")
+
+    await esperar_hora_exacta()  # ⏳ Aquí espera antes de iniciar el loop
+
 
 
 
