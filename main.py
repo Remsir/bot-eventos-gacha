@@ -315,7 +315,7 @@ async def esperar_minuto_10():
 async def on_ready():
     print(f"Bot iniciado como {bot.user}")
     actualizar_eventos.start()
-    await esperar_minuto_10()
+    #await esperar_minuto_10()
     if canal_id and fijado_id:
         try:
             # Intentar obtener el canal, con fallback a fetch
