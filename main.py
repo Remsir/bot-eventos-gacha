@@ -230,6 +230,13 @@ async def editar(ctx, juego: str, nombre_viejo: str, nombre_nuevo: str, fecha: s
     
 
 # ---------------- ACTUALIZACIÓN AUTOMÁTICA ---------------- #
+def formatear_evento(evento: dict) -> str:
+    nombre = evento["nombre"]
+    fecha = evento["fecha"]
+    fecha_dt = datetime.fromisoformat(fecha)
+    fecha_str = fecha_dt.strftime("%d/%m %H:%M")
+    return f"📅 **{nombre}** — `{fecha_str}`"
+
 async def actualizar_mensaje_eventos():
     print("🔁 Ejecutando actualizar_mensaje_eventos()...")
 
