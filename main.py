@@ -298,7 +298,7 @@ async def esperar_hora_exacta():
     """Espera hasta la próxima hora exacta en UTC-4 antes de iniciar el loop."""
     tz = pytz.timezone("Etc/GMT+4")  # UTC-4 (sí, Discord usa el signo invertido para 'Etc/')
     ahora = datetime.now(tz)
-    siguiente_hora = (ahora + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
+    siguiente_hora = (ahora + timedelta(hours=0)).replace(minute=18, second=0, microsecond=0)
     espera = (siguiente_hora - ahora).total_seconds()
     print(f"⏳ Esperando {int(espera)} segundos hasta la próxima hora exacta (UTC-4)...")
     await asyncio.sleep(espera)
