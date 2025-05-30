@@ -298,6 +298,20 @@ async def esperar_hora_exacta():
     await asyncio.sleep(espera)
     actualizar_eventos.start()
 
+async def esperar_minuto_10():
+    """Espera hasta el minuto 10 exacto de la siguiente hora (UTC-4) antes de iniciar el loop."""
+    tz = pytz.timezone("Etc/GMT+4")  # UTC-4
+    ahora = datetime.now(tz)
+
+    # Calcula la próxima hora en punto + 10 minutos
+    siguiente = (ahora + timedelta(hours=1)).replace(minute=15, second=0, microsecond=0)
+    espera = (siguiente - ahora).total_seconds()
+
+    print(f"⏳ Esperando {int(espera)} segundos hasta el minuto 10 de la siguiente hora (UTC-4)...")
+    await asyncio.sleep(espera)
+
+    actualizar_eventos.start()
+
 @bot.event
 async def on_ready():
     print(f"Bot iniciado como {bot.user}")
@@ -344,19 +358,7 @@ async def on_ready():
     else:
         print("ℹ️ No hay mensaje fijado previo guardado.")
 
-async def esperar_minuto_10_de_cada_hora():
-    """Espera hasta el minuto 10 exacto de la siguiente hora (UTC-4) antes de iniciar el loop."""
-    tz = pytz.timezone("Etc/GMT+4")  # UTC-4
-    ahora = datetime.now(tz)
 
-    # Calcula la próxima hora en punto + 10 minutos
-    siguiente = (ahora + timedelta(hours=1)).replace(minute=10, second=0, microsecond=0)
-    espera = (siguiente - ahora).total_seconds()
-
-    print(f"⏳ Esperando {int(espera)} segundos hasta el minuto 10 de la siguiente hora (UTC-4)...")
-    await asyncio.sleep(espera)
-
-    actualizar_eventos.start()
 
 @bot.event
 async def on_command_error(ctx, error):
