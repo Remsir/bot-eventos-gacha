@@ -301,7 +301,7 @@ async def esperar_hora_exacta():
 async def esperar_minuto_10():
     tz = pytz.timezone("Etc/GMT+4")
     ahora = datetime.now(tz)
-    siguiente = (ahora + timedelta(hours=0)).replace(minute=27, second=0, microsecond=0)
+    siguiente = (ahora + timedelta(hours=0)).replace(minute=33, second=0, microsecond=0)
     espera = (siguiente - ahora).total_seconds()
     print(f"⏳ Esperando {int(espera)} segundos hasta el minuto 10 de la siguiente hora (UTC-4)...")
     await asyncio.sleep(espera)
