@@ -304,7 +304,7 @@ async def esperar_minuto_10():
     ahora = datetime.now(tz)
 
     # Calcula la próxima hora en punto + 10 minutos
-    siguiente = (ahora + timedelta(hours=1)).replace(minute=15, second=0, microsecond=0)
+    siguiente = (ahora + timedelta(hours=0)).replace(minute=20, second=0, microsecond=0)
     espera = (siguiente - ahora).total_seconds()
 
     print(f"⏳ Esperando {int(espera)} segundos hasta el minuto 10 de la siguiente hora (UTC-4)...")
