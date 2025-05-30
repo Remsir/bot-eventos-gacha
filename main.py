@@ -336,7 +336,6 @@ async def on_ready():
             print(f"❌ Error inesperado al actualizar mensaje al iniciar: {e}")
     else:
         print("ℹ️ No hay mensaje fijado previo guardado.")
-
     await esperar_hora_exacta()  # ⏳ Aquí espera antes de iniciar el loop
 
 
