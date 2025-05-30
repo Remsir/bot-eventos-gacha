@@ -198,42 +198,44 @@ async def editar(ctx, juego: str, nombre_viejo: str, nombre_nuevo: str, fecha: s
 
 # ---------------- ACTUALIZACIÓN AUTOMÁTICA ---------------- #
 async def actualizar_mensaje_eventos():
-    global canal_id, fijado_id
-    if canal_id and fijado_id:
+    print("🔁 Ejecutando actualizar_mensaje_eventos()...")
+
+    try:
         eventos = cargar_eventos()
-        canal = bot.get_channel(canal_id)
+        print(f"📄 Eventos cargados: {eventos}")
+    except Exception as e:
+        print(f"❌ Error al cargar eventos.json: {e}")
+        return
 
-        cambios = False  # Para guardar si se actualizó algo
-        ahora = datetime.now() - timedelta(hours=4)
+    if not eventos:
+        print("⚠️ No hay eventos para actualizar.")
+        return
 
-        for juego in list(eventos.keys()):
-            nuevos_eventos = []
-            for evento in eventos[juego]:
-                # Verifica si sigue activo
-                if formatear_tiempo_restante(evento["fecha"]):
-                    fecha_evento = datetime.fromisoformat(evento["fecha"])
-                    horas_restantes = (fecha_evento - ahora).total_seconds() / 3600
+    for evento_id, evento in eventos.items():
+        canal_id = evento.get("canal_id")
+        mensaje_id = evento.get("mensaje_id")
 
-                    # Si está a 3 días (±30 minutos), y no fue notificado aún
-                    if 71.5 <= horas_restantes <= 72.5 and not evento.get("notificado_3dias"):
-                        if canal:
-                            try:
-                                await canal.send(
-                                    f"📣 @everyone El evento **{evento['nombre']}** de **{juego}** termina en 3 días."
-                                )
-                                evento["notificado_3dias"] = True
-                                cambios = True
-                            except Exception as e:
-                                print(f"❌ Error al notificar evento de 3 días: {e}")
-                    nuevos_eventos.append(evento)
-            if nuevos_eventos:
-                eventos[juego] = nuevos_eventos
-            else:
-                del eventos[juego]
-                cambios = True
+        if not canal_id or not mensaje_id:
+            print(f"⚠️ Evento {evento_id} sin canal_id o mensaje_id. Saltando.")
+            continue
 
-        if cambios:
-            guardar_eventos(eventos)
+        try:
+            canal = bot.get_channel(canal_id)
+            if canal is None:
+                print(f"❌ No se encontró el canal {canal_id} para el evento {evento_id}.")
+                continue
+
+            mensaje = await canal.fetch_message(mensaje_id)
+            if mensaje is None:
+                print(f"❌ No se encontró el mensaje {mensaje_id} en canal {canal_id}.")
+                continue
+
+            nuevo_contenido = formatear_evento(evento)
+            await mensaje.edit(content=nuevo_contenido)
+            print(f"✅ Evento {evento_id} actualizado correctamente.")
+        except Exception as e:
+            print(f"❌ Error al actualizar evento {evento_id}: {e}")
+
 
         # Actualizar mensaje fijado
         if canal:
@@ -274,7 +276,7 @@ async def actualizar_mensaje_eventos():
 #async def actualizar_eventos():
 #    await bot.wait_until_ready()
 #    await actualizar_mensaje_eventos()
-@tasks.loop(minutes=60)
+@tasks.loop(hours=1)
 async def actualizar_eventos():
     await bot.wait_until_ready()
     # Zona horaria UTC-4
@@ -300,6 +302,7 @@ async def esperar_hora_exacta():
 async def on_ready():
     print(f"Bot iniciado como {bot.user}")
     actualizar_eventos.start()
+    await esperar_minuto_10()
     if canal_id and fijado_id:
         try:
             # Intentar obtener el canal, con fallback a fetch
@@ -340,6 +343,20 @@ async def on_ready():
             print(f"❌ Error inesperado al actualizar mensaje al iniciar: {e}")
     else:
         print("ℹ️ No hay mensaje fijado previo guardado.")
+
+async def esperar_minuto_10_de_cada_hora():
+    """Espera hasta el minuto 10 exacto de la siguiente hora (UTC-4) antes de iniciar el loop."""
+    tz = pytz.timezone("Etc/GMT+4")  # UTC-4
+    ahora = datetime.now(tz)
+
+    # Calcula la próxima hora en punto + 10 minutos
+    siguiente = (ahora + timedelta(hours=1)).replace(minute=10, second=0, microsecond=0)
+    espera = (siguiente - ahora).total_seconds()
+
+    print(f"⏳ Esperando {int(espera)} segundos hasta el minuto 10 de la siguiente hora (UTC-4)...")
+    await asyncio.sleep(espera)
+
+    actualizar_eventos.start()
 
 @bot.event
 async def on_command_error(ctx, error):
