@@ -274,6 +274,7 @@ async def actualizar_mensaje_eventos():
 #async def actualizar_eventos():
 #    await bot.wait_until_ready()
 #    await actualizar_mensaje_eventos()
+@tasks.loop(minutes=60)
 async def actualizar_eventos():
     await bot.wait_until_ready()
     # Zona horaria UTC-4
