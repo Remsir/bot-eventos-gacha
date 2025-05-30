@@ -77,9 +77,35 @@ def construir_mensaje(eventos):
         mensaje += "\n"
     return mensaje.strip()
 
+async def obtener_canal(canal_id):
+    canal = bot.get_channel(canal_id)
+    if canal is None:
+        try:
+            canal = await bot.fetch_channel(canal_id)
+        except discord.NotFound:
+            print(f"❌ Canal con ID {canal_id} no encontrado.")
+            return None
+        except discord.Forbidden:
+            print(f"❌ Sin permisos para acceder al canal con ID {canal_id}.")
+            return None
+        except Exception as e:
+            print(f"❌ Error al obtener el canal con ID {canal_id}: {e}")
+            return None
+    return canal
+    # ---------------- COMANDOS ---------------- #
 
-# ---------------- COMANDOS ---------------- #
 
+@bot.command()
+async def actualizar(ctx):
+    """
+    Fuerza la actualización manual de todos los mensajes de eventos.
+    """
+    await ctx.send("🔄 Actualizando todos los mensajes de eventos...")
+    try:
+        await actualizar_mensaje_eventos()
+        await ctx.send("✅ Mensajes actualizados correctamente.")
+    except Exception as e:
+        await ctx.send(f"❌ Error al actualizar mensajes: {e}")
 
 @bot.command()
 async def crear(ctx, juego: str, nombre: str, fecha: str, hora: str):
@@ -94,16 +120,23 @@ async def crear(ctx, juego: str, nombre: str, fecha: str, hora: str):
         if juego not in eventos:
             eventos[juego] = []
 
+        # Enviar mensaje del evento
+        contenido = f"📅 **{nombre}** - {formatear_tiempo_restante(fecha_obj.isoformat())}"
+        mensaje = await ctx.send(contenido)
+
         eventos[juego].append({
             "nombre": nombre,
-            "fecha": fecha_obj.isoformat()
+            "fecha": fecha_obj.isoformat(),
+            "canal_id": ctx.channel.id,
+            "mensaje_id": mensaje.id
         })
 
         guardar_eventos(eventos)
         await ctx.send(f"✅ Evento **{nombre}** creado para **{juego}**.")
-        await actualizar_mensaje_eventos()  # ✅ Solo si todo fue bien
+        await actualizar_mensaje_eventos()
     except ValueError:
         await ctx.send("❌ Formato incorrecto. Usa: !crear Genshin Evento1 2025-06-01 18:00")
+
 
     
 
@@ -220,12 +253,11 @@ async def actualizar_mensaje_eventos():
                 print(f"⚠️ Evento sin canal_id o mensaje_id. Saltando. Detalle: {evento}")
                 continue
 
-            try:
-                canal = bot.get_channel(canal_id)
-                if canal is None:
-                    print(f"❌ No se encontró el canal {canal_id} para el evento en {juego}.")
-                    continue
+            canal = await obtener_canal(canal_id)
+            if canal is None:
+                continue
 
+            try:
                 mensaje = await canal.fetch_message(mensaje_id)
                 if mensaje is None:
                     print(f"❌ No se encontró el mensaje {mensaje_id} en canal {canal_id}.")
@@ -238,17 +270,19 @@ async def actualizar_mensaje_eventos():
                 print(f"❌ Error al actualizar evento en {juego}: {e}")
 
     # Actualizar mensaje fijado al final (una sola vez)
-    if canal_id and fijado_id:
-        try:
-            canal = bot.get_channel(canal_id)
-            if canal:
+    canal_id_fijado, fijado_id = cargar_fijado()
+    if canal_id_fijado and fijado_id:
+        canal = await obtener_canal(canal_id_fijado)
+        if canal:
+            try:
                 mensaje = await canal.fetch_message(fijado_id)
                 await mensaje.edit(content=construir_mensaje(eventos))
                 print("✅ Mensaje fijado actualizado.")
-        except discord.NotFound:
-            print("⚠️ Mensaje fijado no encontrado.")
-        except Exception as e:
-            print(f"❌ Error al actualizar mensaje fijado: {e}")
+            except discord.NotFound:
+                print("⚠️ Mensaje fijado no encontrado.")
+            except Exception as e:
+                print(f"❌ Error al actualizar mensaje fijado: {e}")
+
 
 
 # @tasks.loop(minutes=UPDATE_INTERVAL_MINUTES)
