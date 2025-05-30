@@ -298,7 +298,7 @@ async def esperar_hora_exacta():
     await asyncio.sleep(espera)
     actualizar_eventos.start()
 
-
+@bot.event
 async def on_ready():
     print(f"Bot iniciado como {bot.user}")
 
