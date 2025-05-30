@@ -219,7 +219,7 @@ async def actualizar_mensaje_eventos():
                         if canal:
                             try:
                                 await canal.send(
-                                    f"📣 @everyone El evento **{evento['nombre']}** de **{juego}** comienza en 3 días."
+                                    f"📣 @everyone El evento **{evento['nombre']}** de **{juego}** termina en 3 días."
                                 )
                                 evento["notificado_3dias"] = True
                                 cambios = True
