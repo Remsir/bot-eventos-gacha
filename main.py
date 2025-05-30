@@ -299,19 +299,18 @@ async def esperar_hora_exacta():
     actualizar_eventos.start()
 
 async def esperar_minuto_10():
-    """Espera hasta el minuto 10 exacto de la siguiente hora (UTC-4) antes de iniciar el loop."""
-    tz = pytz.timezone("Etc/GMT+4")  # UTC-4
+    tz = pytz.timezone("Etc/GMT+4")
     ahora = datetime.now(tz)
-
-    # Calcula la próxima hora en punto + 10 minutos
-    siguiente = (ahora + timedelta(hours=0)).replace(minute=20, second=0, microsecond=0)
+    siguiente = (ahora + timedelta(hours=0)).replace(minute=27, second=0, microsecond=0)
     espera = (siguiente - ahora).total_seconds()
-
     print(f"⏳ Esperando {int(espera)} segundos hasta el minuto 10 de la siguiente hora (UTC-4)...")
     await asyncio.sleep(espera)
 
-    actualizar_eventos.start()
-
+    if not actualizar_eventos.is_running():
+        actualizar_eventos.start()
+        print("🔁 Loop de actualización iniciado.")
+    else:
+        print("⚠️ El loop de actualización ya estaba corriendo.")
 @bot.event
 async def on_ready():
     print(f"Bot iniciado como {bot.user}")
