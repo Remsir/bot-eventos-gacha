@@ -270,10 +270,20 @@ async def actualizar_mensaje_eventos():
 
 
 
-@tasks.loop(minutes=60)
+#@tasks.loop(minutes=60)
+#async def actualizar_eventos():
+#    await bot.wait_until_ready()
+#    await actualizar_mensaje_eventos()
 async def actualizar_eventos():
     await bot.wait_until_ready()
-    await actualizar_mensaje_eventos()
+    # Zona horaria UTC-4
+    tz = pytz.timezone("Etc/GMT+4")
+    ahora = datetime.now(tz)
+
+    # Ejecutar solo si es la hora exacta (minuto 0)
+    if ahora.minute == 0:
+        print(f"⏱ Ejecutando actualización automática a las {ahora.strftime('%H:%M')} (UTC-4)...")
+        await actualizar_mensaje_eventos()
 
 async def esperar_hora_exacta():
     """Espera hasta la próxima hora exacta en UTC-4 antes de iniciar el loop."""
@@ -288,7 +298,7 @@ async def esperar_hora_exacta():
 @bot.event
 async def on_ready():
     print(f"Bot iniciado como {bot.user}")
-
+    actualizar_eventos.start()
     if canal_id and fijado_id:
         try:
             # Intentar obtener el canal, con fallback a fetch
