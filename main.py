@@ -243,30 +243,31 @@ async def actualizar_mensaje_eventos():
             except discord.NotFound:
                 print("Mensaje fijado no encontrado.")
 
-@tasks.loop(minutes=UPDATE_INTERVAL_MINUTES)
-async def actualizar_mensaje():
-    await bot.wait_until_ready()
-    global canal_id, fijado_id
-    if canal_id is None or fijado_id is None:
-        return
+# @tasks.loop(minutes=UPDATE_INTERVAL_MINUTES)
+# async def actualizar_mensaje():
+#     await bot.wait_until_ready()
+#     global canal_id, fijado_id
+#     if canal_id is None or fijado_id is None:
+#         return
+#
+#     canal = bot.get_channel(canal_id)
+#     if canal is None:
+#         return
+#
+#     try:
+#         mensaje = await canal.fetch_message(fijado_id)
+#         eventos = cargar_eventos()
+#         for juego in list(eventos.keys()):
+#             eventos[juego] = [e for e in eventos[juego] if formatear_tiempo_restante(e["fecha"])]
+#             if not eventos[juego]:
+#                 del eventos[juego]
+#
+#         guardar_eventos(eventos)
+#         nuevo_contenido = construir_mensaje(eventos)
+#         await mensaje.edit(content=nuevo_contenido)
+#     except Exception as e:
+#         print("Error actualizando mensaje:", e)
 
-    canal = bot.get_channel(canal_id)
-    if canal is None:
-        return
-
-    try:
-        mensaje = await canal.fetch_message(fijado_id)
-        eventos = cargar_eventos()
-        for juego in list(eventos.keys()):
-            eventos[juego] = [e for e in eventos[juego] if formatear_tiempo_restante(e["fecha"])]
-            if not eventos[juego]:
-                del eventos[juego]
-
-        guardar_eventos(eventos)
-        nuevo_contenido = construir_mensaje(eventos)
-        await mensaje.edit(content=nuevo_contenido)
-    except Exception as e:
-        print("Error actualizando mensaje:", e)
 
 
 @tasks.loop(minutes=60)
@@ -317,7 +318,8 @@ async def on_ready():
             print("✅ Mensaje fijado actualizado automáticamente al iniciar.")
 
             await esperar_hora_exacta()
-            actualizar_eventos_loop.start()
+            actualizar_eventos.start()  # No usar el nombre incorrecto
+
 
         except discord.NotFound:
             print("⚠️ El mensaje fijado guardado ya no existe.")
