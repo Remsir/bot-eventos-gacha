@@ -211,39 +211,45 @@ async def actualizar_mensaje_eventos():
         print("⚠️ No hay eventos para actualizar.")
         return
 
-    for evento_id, evento in eventos.items():
-        canal_id = evento.get("canal_id")
-        mensaje_id = evento.get("mensaje_id")
+    for juego, lista_eventos in eventos.items():
+        for evento in lista_eventos:
+            canal_id = evento.get("canal_id")
+            mensaje_id = evento.get("mensaje_id")
 
-        if not canal_id or not mensaje_id:
-            print(f"⚠️ Evento {evento_id} sin canal_id o mensaje_id. Saltando.")
-            continue
+            if not canal_id or not mensaje_id:
+                print(f"⚠️ Evento sin canal_id o mensaje_id. Saltando. Detalle: {evento}")
+                continue
 
+            try:
+                canal = bot.get_channel(canal_id)
+                if canal is None:
+                    print(f"❌ No se encontró el canal {canal_id} para el evento en {juego}.")
+                    continue
+
+                mensaje = await canal.fetch_message(mensaje_id)
+                if mensaje is None:
+                    print(f"❌ No se encontró el mensaje {mensaje_id} en canal {canal_id}.")
+                    continue
+
+                nuevo_contenido = formatear_evento(evento)
+                await mensaje.edit(content=nuevo_contenido)
+                print(f"✅ Evento actualizado correctamente en {juego}.")
+            except Exception as e:
+                print(f"❌ Error al actualizar evento en {juego}: {e}")
+
+    # Actualizar mensaje fijado al final (una sola vez)
+    if canal_id and fijado_id:
         try:
             canal = bot.get_channel(canal_id)
-            if canal is None:
-                print(f"❌ No se encontró el canal {canal_id} para el evento {evento_id}.")
-                continue
-
-            mensaje = await canal.fetch_message(mensaje_id)
-            if mensaje is None:
-                print(f"❌ No se encontró el mensaje {mensaje_id} en canal {canal_id}.")
-                continue
-
-            nuevo_contenido = formatear_evento(evento)
-            await mensaje.edit(content=nuevo_contenido)
-            print(f"✅ Evento {evento_id} actualizado correctamente.")
-        except Exception as e:
-            print(f"❌ Error al actualizar evento {evento_id}: {e}")
-
-
-        # Actualizar mensaje fijado
-        if canal:
-            try:
+            if canal:
                 mensaje = await canal.fetch_message(fijado_id)
                 await mensaje.edit(content=construir_mensaje(eventos))
-            except discord.NotFound:
-                print("Mensaje fijado no encontrado.")
+                print("✅ Mensaje fijado actualizado.")
+        except discord.NotFound:
+            print("⚠️ Mensaje fijado no encontrado.")
+        except Exception as e:
+            print(f"❌ Error al actualizar mensaje fijado: {e}")
+
 
 # @tasks.loop(minutes=UPDATE_INTERVAL_MINUTES)
 # async def actualizar_mensaje():
